@@ -15,3 +15,9 @@ __pycache__/
 venv/
 .pytest_cache/
 *.egg-info/
+
+# IDE
+.idea/
+.vscode/
+
+课题目标.md
