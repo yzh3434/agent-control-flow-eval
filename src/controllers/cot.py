@@ -8,8 +8,8 @@ class CoTController(Controller):
     def run(self, task, env):
         messages = [
             {"role": "system",
-             "content": "Solve the math question. Think step by step, then end "
-                        "your reply with 'The answer is <number>'."},
+             "content": "Solve the question. Think step by step, then end "
+                        "your reply with 'The answer is <answer>'."},
             {"role": "user", "content": task.question},
         ]
         result = self.client.chat(messages)
@@ -19,6 +19,7 @@ class CoTController(Controller):
                         observation=result.text)],
             final_answer=result.text,
             success=env.grade(task, result.text),
+            score=env.score(task, result.text),
             num_rounds=1,
             prompt_tokens=result.prompt_tokens,
             completion_tokens=result.completion_tokens,

@@ -23,6 +23,7 @@ class Trajectory:
     prompt_tokens: int
     completion_tokens: int
     api_calls: int
+    score: float = 0.0          # graded score: EM (0/1) for GSM8K, token-F1 for HotpotQA
     trials: int = 1
     reflections: List[str] = field(default_factory=list)
 

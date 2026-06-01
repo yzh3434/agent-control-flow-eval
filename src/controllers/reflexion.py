@@ -45,6 +45,7 @@ class ReflexionController(Controller):
         prompt_tokens = completion_tokens = api_calls = 0
         final_answer = None
         success = False
+        score = 0.0
         trial = 0
 
         while trial < self.max_trials:
@@ -57,6 +58,7 @@ class ReflexionController(Controller):
             api_calls += traj.api_calls
             final_answer = traj.final_answer
             success = traj.success
+            score = traj.score
             if success:
                 break
             if trial < self.max_trials:
@@ -69,7 +71,7 @@ class ReflexionController(Controller):
         return Trajectory(
             task_id=task.id, controller=self.name, difficulty=task.difficulty,
             steps=steps, final_answer=final_answer, success=success,
-            num_rounds=len(steps),
+            score=score, num_rounds=len(steps),
             prompt_tokens=prompt_tokens, completion_tokens=completion_tokens,
             api_calls=api_calls, trials=trial, reflections=reflections,
         )

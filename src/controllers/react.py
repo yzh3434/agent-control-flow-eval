@@ -40,15 +40,17 @@ class ReActController(Controller):
         self.max_rounds = max_rounds
 
     def run(self, task, env):
-        tools = {t.name: t for t in env.tools()}
+        tool_list = env.tools(task)
+        tools = {t.name: t for t in tool_list}
         messages = [
-            {"role": "system", "content": _build_system_prompt(env.tools())},
+            {"role": "system", "content": _build_system_prompt(tool_list)},
             {"role": "user", "content": f"Question: {task.question}"},
         ]
         steps = []
         prompt_tokens = completion_tokens = api_calls = 0
         final_answer = None
         success = False
+        score = 0.0
 
         for _ in range(self.max_rounds):
             result = self.client.chat(messages)
@@ -64,6 +66,7 @@ class ReActController(Controller):
             elif action == "Finish":
                 final_answer = action_input
                 success = env.grade(task, action_input)
+                score = env.score(task, action_input)
                 steps.append(Step(thought=thought, action="Finish",
                                   action_input=action_input, observation=""))
                 break
@@ -79,7 +82,7 @@ class ReActController(Controller):
         return Trajectory(
             task_id=task.id, controller=self.name, difficulty=task.difficulty,
             steps=steps, final_answer=final_answer, success=success,
-            num_rounds=len(steps),
+            score=score, num_rounds=len(steps),
             prompt_tokens=prompt_tokens, completion_tokens=completion_tokens,
             api_calls=api_calls,
         )

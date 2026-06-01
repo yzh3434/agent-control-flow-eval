@@ -24,6 +24,11 @@ class Environment(ABC):
     def grade(self, task: Task, predicted: str) -> bool:
         ...
 
+    def score(self, task: Task, predicted: str) -> float:
+        """Graded score in [0, 1]. Defaults to exact match (1.0/0.0);
+        environments with partial credit (e.g. QA F1) override this."""
+        return 1.0 if self.grade(task, predicted) else 0.0
+
     @abstractmethod
-    def tools(self) -> List[Tool]:
+    def tools(self, task: Task) -> List[Tool]:
         ...

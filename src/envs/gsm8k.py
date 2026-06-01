@@ -83,5 +83,5 @@ class GSM8KEnv(Environment):
             return False
         return numbers_match(pred, gold)
 
-    def tools(self) -> List[Tool]:
+    def tools(self, task: Task) -> List[Tool]:
         return [make_calculator()]
