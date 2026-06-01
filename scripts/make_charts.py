@@ -4,7 +4,6 @@ Produces, per environment:
   - <env>_success_by_difficulty.png   grouped bars of success rate (EM)
   - <env>_f1_by_difficulty.png        grouped bars of token-F1 (HotpotQA only)
   - <env>_tokens_by_difficulty.png    grouped bars of avg tokens (cost)
-  - <env>_radar.png                   multi-metric capability radar (hardest tier)
 
 Charts are written to figures/ (committed, so they can be embedded in the README
 and the report). Run after scripts/run_experiment.py has populated results/.
@@ -65,43 +64,6 @@ def _grouped_bar(data, difficulties, metric, title, ylabel, outpath):
     print(f"wrote {outpath}")
 
 
-def _radar(data, difficulty, env, outpath):
-    """Multi-metric capability radar at one difficulty; one polygon per controller."""
-    metrics = [("success_rate", "EM")]
-    if env == "hotpotqa":
-        metrics.append(("avg_f1", "F1"))
-    # efficiency axes (higher = cheaper), normalized across controllers
-    max_tok = max(data[c][difficulty]["avg_tokens"] for c in CONTROLLERS) or 1.0
-    max_rnd = max(data[c][difficulty]["avg_rounds"] for c in CONTROLLERS) or 1.0
-
-    def values(c):
-        m = data[c][difficulty]
-        vals = [m[key] for key, _ in metrics]
-        vals.append(1 - m["avg_tokens"] / max_tok)   # token efficiency
-        vals.append(1 - m["avg_rounds"] / max_rnd)   # round efficiency
-        return vals
-
-    labels = [lbl for _, lbl in metrics] + ["Token eff.", "Round eff."]
-    angles = np.linspace(0, 2 * np.pi, len(labels), endpoint=False).tolist()
-    angles += angles[:1]
-
-    fig, ax = plt.subplots(figsize=(7, 7), subplot_kw={"polar": True})
-    for c in CONTROLLERS:
-        vals = values(c)
-        vals += vals[:1]
-        ax.plot(angles, vals, label=c, color=COLORS[c], linewidth=2)
-        ax.fill(angles, vals, color=COLORS[c], alpha=0.08)
-    ax.set_xticks(angles[:-1])
-    ax.set_xticklabels(labels)
-    ax.set_ylim(0, 1)
-    ax.set_title(f"{env} capability radar ({difficulty})")
-    ax.legend(loc="upper right", bbox_to_anchor=(1.25, 1.1))
-    fig.tight_layout()
-    fig.savefig(outpath, dpi=150)
-    plt.close(fig)
-    print(f"wrote {outpath}")
-
-
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--env", default="gsm8k", choices=list(ENV_DIFFICULTIES))
@@ -122,8 +84,6 @@ def main():
     _grouped_bar(data, difficulties, "avg_tokens",
                  f"{args.env}: avg tokens per question by difficulty", "avg tokens",
                  os.path.join(FIG_DIR, f"{args.env}_tokens_by_difficulty.png"))
-    _radar(data, difficulties[-1], args.env,
-           os.path.join(FIG_DIR, f"{args.env}_radar.png"))
     return 0
 
 
