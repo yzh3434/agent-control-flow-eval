@@ -1,0 +1,10 @@
+model: deepseek-chat
+base_url: https://api.deepseek.com
+sample_size: 100          # questions per difficulty tier
+max_rounds: 7             # ReAct max Thought/Action/Observation loops
+reflexion_trials: 3       # max Reflexion retries
+concurrency: 4            # parallel workers in the runner
+easy_max_steps: 2         # GSM8K gold solutions with <= this many steps -> easy
+hard_min_steps: 5         # GSM8K gold solutions with >= this many steps -> hard
+temperature: 0.0
+request_timeout: 60
